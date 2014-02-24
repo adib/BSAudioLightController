@@ -10,6 +10,8 @@
 
 @interface BSViewController ()
 
+@property (weak, nonatomic) IBOutlet UILabel *headphoneJackLabel;
+
 @end
 
 @implementation BSViewController
