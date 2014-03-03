@@ -7,11 +7,13 @@
 //
 
 #import "BSViewController.h"
+#import "BSAudioLightController.h"
 
 @interface BSViewController ()
 
 @property (weak, nonatomic) IBOutlet UILabel *headphoneJackLabel;
 
+@property (nonatomic,strong,readonly) BSAudioLightController* audioLightController;
 @end
 
 @implementation BSViewController
@@ -20,12 +22,25 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    [self audioLightController];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark Property Access
+
+@synthesize audioLightController = _audioLightController;
+
+-(BSAudioLightController *)audioLightController
+{
+    if (!_audioLightController) {
+        _audioLightController = [BSAudioLightController new];
+    }
+    return _audioLightController;
 }
 
 @end

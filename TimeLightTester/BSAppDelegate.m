@@ -7,12 +7,16 @@
 //
 
 #import "BSAppDelegate.h"
+#import "BSAudioLightController.h"
+
 
 @implementation BSAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setBool:YES forKey:BSAudioLightEnabledPrefKey];
     return YES;
 }
 							
