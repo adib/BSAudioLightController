@@ -10,11 +10,11 @@
 
 #import "BSAudioLightController.h"
 
-NSString* const BSAudioLightControllerAvailabilityNotification = @"BSAudioLightControllerAvailabilityNotification";
+NSString* const BSAudioLightAvailabilityNotification = @"BSAudioLightAvailabilityNotification";
 
 NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 
-NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightControllerAvailabilityKey";
+NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 // https://developer.apple.com/library/ios/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingRouteChanges/HandlingRouteChanges.html#//apple_ref/doc/uid/TP40007875-CH12-SW1
 
 // http://stackoverflow.com/questions/16869089/ios-audio-output-only-to-headphone-jack
@@ -28,7 +28,9 @@ NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightController
 
 @implementation BSAudioLightController {
     NSMutableDictionary* _audioPlayers;
-    BSAudioLightItem _activeLightItems;
+    NSUInteger _activeLightItems;
+    NSNumber* _audioLightEnabled;
+    BOOL _audioSessionActivated;
 }
 
 -(id)init
@@ -37,11 +39,12 @@ NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightController
         NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
         [nc addObserver:self selector:@selector(audioSessionRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
         [nc addObserver:self selector:@selector(mediaServicesWereReset:) name:AVAudioSessionMediaServicesWereResetNotification object:nil];
+        [nc addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:nil];
 #if TARGET_OS_IPHONE
         [nc addObserver:self selector:@selector(applicationDidReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #endif // TARGET_OS_IPHONE
-        AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-        NSLog(@"audio route: %@",audioSession.currentRoute);
+       // initialize the audio session
+        [self enabled];
     }
     return self;
 }
@@ -52,6 +55,44 @@ NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightController
 }
 
 
+-(BOOL) enabled
+{
+    if (![self audioLightEnabled]) {
+        return NO;
+    }
+    
+    // check the current audio session and only play if it's the audio jack.
+    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+    AVAudioSessionRouteDescription* currentRoute = [audioSession currentRoute];
+    NSArray* outputs = [currentRoute outputs];
+    if (outputs.count == 1 && [AVAudioSessionPortHeadphones isEqual:[outputs[0] portType]]) {
+        if (!_audioSessionActivated) {
+            NSError* audioCategoryError = nil;
+            if ([audioSession setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionDuckOthers error:&audioCategoryError]) {
+                NSError* audioSessionActivationError = nil;
+                if ([audioSession setActive:YES error:&audioSessionActivationError]) {
+                    _audioSessionActivated = YES;
+                } else {
+                    NSLog(@"Error activating audio session: %@",audioSessionActivationError);
+                }
+            } else {
+                NSLog(@"Error setting audio category: %@",audioCategoryError);
+            }
+        }
+    } else {
+        return NO;
+    }
+
+    return _audioSessionActivated;
+}
+
+-(BOOL) audioLightEnabled
+{
+    if (!_audioLightEnabled) {
+        _audioLightEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:BSAudioLightEnabledPrefKey];
+    }
+    return [_audioLightEnabled boolValue];
+}
 
 -(NSURL*) soundFileOfAudioLightItem:(BSAudioLightItem) item
 {
@@ -102,11 +143,17 @@ NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightController
 
 -(void) playAudioLightItem:(BSAudioLightItem) item
 {
-    if (![[NSUserDefaults standardUserDefaults] boolForKey:BSAudioLightEnabledPrefKey]) {
-        return;
+    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+    AVAudioSessionRouteDescription *currentRoute = [audioSession currentRoute];
+    NSLog(@"route outputs: %@",[currentRoute outputs]);
+    if(!_audioSessionActivated) {
+        NSError* audioCategoryError = nil;
+        if([audioSession setCategory:AVAudioSessionCategoryPlayback error:&audioCategoryError]) {
+            
+        } else {
+            NSLog(@"Failed to set audio category: %@",audioCategoryError);
+        }
     }
-    // TODO: check the current audio session and only play if it's the audio jack.
-    
     AVAudioPlayer* player = [self audioPlayerOfLightItem:item];
     [player play];
 }
@@ -118,17 +165,33 @@ NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightController
     [player stop];
 }
 
--(void) reactivatePlayer
+
+-(BOOL) refreshPlayers
 {
-    // TODO: re-activate currently playing audio light items
+    const BOOL audioCanPlay = [self enabled];
+    void(^refreshPlayer)(BSAudioLightItem) = ^(BSAudioLightItem item) {
+        BOOL itemPlaying = (_activeLightItems & item) != 0;
+        if (itemPlaying ^ audioCanPlay) {
+            [self stopAudioLightItem:item];
+        } else if(itemPlaying && audioCanPlay) {
+            [self playAudioLightItem:item];
+        }
+    };
+    refreshPlayer(BSAudioLightItemGreen);
+    refreshPlayer(BSAudioLightItemYellow);
+    refreshPlayer(BSAudioLightItemRed);
+    refreshPlayer(BSAudioLightItemBuzzer);
+    return audioCanPlay;
 }
 
 
 -(void)audioLightItem:(BSAudioLightItem)item setActive:(BOOL)active
 {
     if (active) {
-        _activeLightItems &= item;
-        [self playAudioLightItem:item];
+        _activeLightItems |= item;
+        if ([self enabled]) {
+            [self playAudioLightItem:item];
+        }
     } else {
         _activeLightItems &= ~item;
         [self stopAudioLightItem:item];
@@ -157,12 +220,31 @@ NSString* const BSAudioLightControllerAvailabilityKey = @"BSAudioLightController
 {
     NSLog(@"Route changed: %@", notification.userInfo);
     // TODO: reactivate active items if audio jack is connected.
+    BOOL audioCanPlay = [self refreshPlayers];
+    
+    NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(audioCanPlay)};
+    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
 }
 
 
 -(void) mediaServicesWereReset:(NSNotification*) notification
 {
     NSLog(@"Media services reset.");
-    // TODO: reactivate active items
+    _audioPlayers = nil;
+    _audioSessionActivated = NO;
+    BOOL available = [self refreshPlayers];
+    NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
+    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+}
+
+-(void) userDefaultsDidChange:(NSNotification*) notification
+{
+    NSNumber* updatedAudioLightEnabled =  [[NSUserDefaults standardUserDefaults] objectForKey:BSAudioLightEnabledPrefKey];
+    if ([updatedAudioLightEnabled boolValue] != [_audioLightEnabled boolValue]) {
+        _audioLightEnabled = updatedAudioLightEnabled;
+        BOOL available = [self refreshPlayers];
+        NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
+        [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+    }
 }
 @end

@@ -26,10 +26,12 @@ typedef enum {
 @interface BSAudioLightController : NSObject
 
 -(void) audioLightItem:(BSAudioLightItem) item setActive:(BOOL) active;
-                        
+
+-(BOOL) enabled;
+
 @end
 
-extern NSString* const BSAudioLightControllerAvailabilityNotification;
-extern NSString* const BSAudioLightControllerAvailabilityKey;
+extern NSString* const BSAudioLightAvailabilityNotification;
+extern NSString* const BSAudioLightAvailabilityKey;
 
 extern NSString* const BSAudioLightEnabledPrefKey;
