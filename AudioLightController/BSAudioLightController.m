@@ -10,6 +10,18 @@
 
 #import "BSAudioLightController.h"
 
+/*
+ Left channel:
+ - 1000Hz – Green LED
+ - 2000Hz – Yellow LED
+ - 3000Hz – Red LED
+ 
+ Right channel:
+ - 1500Hz – Buzzer
+
+ All square wave (_not_ sine wave).
+ */
+
 NSString* const BSAudioLightAvailabilityNotification = @"BSAudioLightAvailabilityNotification";
 
 NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
@@ -135,8 +147,9 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
             NSLog(@"Error %@ loading file %@",error,audioFileURL);
             return nil;
         }
-        _audioPlayers[itemObj] = player;
         player.numberOfLoops = -1; // loop indefinitely
+        player.volume = 1;
+        _audioPlayers[itemObj] = player;
     }
     return player;
 }
