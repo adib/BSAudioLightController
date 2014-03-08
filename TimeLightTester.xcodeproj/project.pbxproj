@@ -107,7 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				C01F32B318BE223D0036B89D /* AudioLightController */,
-				C052976A18BB8D9B001451C4 /* TimeLightTester */,
+				C052976A18BB8D9B001451C4 /* TimeLightTester-iOS */,
 				C052978918BB8D9C001451C4 /* TimeLightTesterTests */,
 				C052976318BB8D9B001451C4 /* Frameworks */,
 				C052976218BB8D9B001451C4 /* Products */,
@@ -134,7 +134,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		C052976A18BB8D9B001451C4 /* TimeLightTester */ = {
+		C052976A18BB8D9B001451C4 /* TimeLightTester-iOS */ = {
 			isa = PBXGroup;
 			children = (
 				C052977318BB8D9B001451C4 /* BSAppDelegate.h */,
@@ -145,7 +145,7 @@
 				C052977C18BB8D9B001451C4 /* Images.xcassets */,
 				C052976B18BB8D9B001451C4 /* Supporting Files */,
 			);
-			path = TimeLightTester;
+			path = "TimeLightTester-iOS";
 			sourceTree = "<group>";
 		};
 		C052976B18BB8D9B001451C4 /* Supporting Files */ = {
@@ -419,8 +419,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "TimeLightTester/TimeLightTester-Prefix.pch";
-				INFOPLIST_FILE = "TimeLightTester/TimeLightTester-Info.plist";
+				GCC_PREFIX_HEADER = "TimeLightTester-iOS/TimeLightTester-Prefix.pch";
+				INFOPLIST_FILE = "TimeLightTester-iOS/TimeLightTester-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
@@ -435,8 +435,8 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "TimeLightTester/TimeLightTester-Prefix.pch";
-				INFOPLIST_FILE = "TimeLightTester/TimeLightTester-Info.plist";
+				GCC_PREFIX_HEADER = "TimeLightTester-iOS/TimeLightTester-Prefix.pch";
+				INFOPLIST_FILE = "TimeLightTester-iOS/TimeLightTester-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
