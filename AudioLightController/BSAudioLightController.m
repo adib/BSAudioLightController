@@ -29,26 +29,28 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 -(NSURL*) soundFileOfAudioLightItem:(BSAudioLightItem) item;
 
-
 @end
 
 @implementation BSAudioLightController {
     NSMutableDictionary* _audioPlayers;
     NSUInteger _activeLightItems;
     NSNumber* _audioLightEnabled;
+#if TARGET_OS_IPHONE
     BOOL _audioSessionActivated;
+#endif // TARGET_OS_IPHONE
 }
 
 -(id)init
 {
     if (self = [super init]) {
         NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+#if TARGET_OS_IPHONE
         [nc addObserver:self selector:@selector(audioSessionRouteChanged:) name:AVAudioSessionRouteChangeNotification object:nil];
         [nc addObserver:self selector:@selector(mediaServicesWereReset:) name:AVAudioSessionMediaServicesWereResetNotification object:nil];
-        [nc addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:nil];
-#if TARGET_OS_IPHONE
         [nc addObserver:self selector:@selector(applicationDidReceiveMemoryWarning:) name:UIApplicationDidReceiveMemoryWarningNotification object:nil];
 #endif // TARGET_OS_IPHONE
+        [nc addObserver:self selector:@selector(userDefaultsDidChange:) name:NSUserDefaultsDidChangeNotification object:nil];
+
        // initialize the audio session
         [self enabled];
     }
@@ -67,6 +69,7 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
         return NO;
     }
     
+#if TARGET_OS_IPHONE
     // check the current audio session and only play if it's the audio jack.
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
     AVAudioSessionRouteDescription* currentRoute = [audioSession currentRoute];
@@ -88,8 +91,13 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
     } else {
         return NO;
     }
-
     return _audioSessionActivated;
+#else
+    // TODO: handle Mac OS X audio jack check
+    return YES;
+#endif // TARGET_OS_IPHONE
+    
+
 }
 
 -(BOOL) audioLightEnabled
@@ -156,7 +164,7 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
     if(!_audioSessionActivated) {
         NSError* audioCategoryError = nil;
         if([audioSession setCategory:AVAudioSessionCategoryPlayback error:&audioCategoryError]) {
-            
+            _audioSessionActivated = YES;
         } else {
             NSLog(@"Failed to set audio category: %@",audioCategoryError);
         }
@@ -167,7 +175,7 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 -(void) stopAudioLightItem:(BSAudioLightItem) item
 {
-    // don't use method since it will allocate on demand.
+    // don't use the method since it will allocate on demand.
     AVAudioPlayer* player = _audioPlayers[@(item)];
     [player stop];
 }
@@ -221,14 +229,10 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
         [_audioPlayers removeObjectsForKeys:keysToRemove];
     }
 }
-#endif // TARGET_OS_IPHONE
 
 -(void) audioSessionRouteChanged:(NSNotification*) notification
 {
-    NSLog(@"Route changed: %@", notification.userInfo);
-    // TODO: reactivate active items if audio jack is connected.
     BOOL audioCanPlay = [self refreshPlayers];
-    
     NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(audioCanPlay)};
     [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
 }
@@ -236,13 +240,17 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 -(void) mediaServicesWereReset:(NSNotification*) notification
 {
-    NSLog(@"Media services reset.");
     _audioPlayers = nil;
+#if TARGET_OS_IPHONE
     _audioSessionActivated = NO;
+#endif // TARGET_OS_IPHONE
     BOOL available = [self refreshPlayers];
     NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
     [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
 }
+
+#endif // TARGET_OS_IPHONE
+
 
 -(void) userDefaultsDidChange:(NSNotification*) notification
 {
