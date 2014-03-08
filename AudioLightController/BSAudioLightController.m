@@ -5,31 +5,25 @@
 //  Created by Sasmito Adibowo on 24-02-14.
 //  Copyright (c) 2014 Basil Salad Software. All rights reserved.
 //
+//  Licensed under the BSD License <http://www.opensource.org/licenses/bsd-license>
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+//  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+//  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+//  SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+//  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+//  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+//  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+//  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+//  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
 
 @import AVFoundation;
 
 #import "BSAudioLightController.h"
 
-/*
- Left channel:
- - 1000Hz – Green LED
- - 2000Hz – Yellow LED
- - 3000Hz – Red LED
- 
- Right channel:
- - 1500Hz – Buzzer
-
- All square wave (_not_ sine wave).
- */
-
 NSString* const BSAudioLightAvailabilityNotification = @"BSAudioLightAvailabilityNotification";
-
 NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
-
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
-// https://developer.apple.com/library/ios/documentation/Audio/Conceptual/AudioSessionProgrammingGuide/HandlingRouteChanges/HandlingRouteChanges.html#//apple_ref/doc/uid/TP40007875-CH12-SW1
-
-// http://stackoverflow.com/questions/16869089/ios-audio-output-only-to-headphone-jack
 
 @interface BSAudioLightController ()
 
