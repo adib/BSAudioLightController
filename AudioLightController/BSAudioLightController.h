@@ -26,7 +26,8 @@ typedef enum {
     BSAudioLightItemGreen   = 1,
     BSAudioLightItemYellow  = 1 << 1,
     BSAudioLightItemRed     = 1 << 2,
-    BSAudioLightItemBuzzer  = 1 << 3
+    BSAudioLightItemBuzzer  = 1 << 3,
+    BSAudioLightItemMax     = 1 << 4
 } BSAudioLightItem;
 
 

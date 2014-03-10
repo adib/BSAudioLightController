@@ -25,6 +25,10 @@ NSString* const BSAudioLightAvailabilityNotification = @"BSAudioLightAvailabilit
 NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
+// in nanoseconds
+const uint64_t BSAudioLightTwiddleInterval = 1000000000L * 0.5;
+const uint64_t BSAudioLightTwiddleLeeway = 0;
+
 @interface BSAudioLightController ()
 
 -(NSURL*) soundFileOfAudioLightItem:(BSAudioLightItem) item;
@@ -35,6 +39,8 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
     NSMutableDictionary* _audioPlayers;
     NSUInteger _activeLightItems;
     NSNumber* _audioLightEnabled;
+    dispatch_queue_t _audioPlayerQueue;
+    dispatch_source_t _twiddleDispatch;
 #if TARGET_OS_IPHONE
     BOOL _audioSessionActivated;
 #endif // TARGET_OS_IPHONE
@@ -134,50 +140,45 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 }
 
 
--(AVAudioPlayer*) audioPlayerOfLightItem:(BSAudioLightItem) item
-{
-    if (!_audioPlayers) {
-        _audioPlayers = [NSMutableDictionary dictionaryWithCapacity:4];
-    }
-    id itemObj = @(item);
-    AVAudioPlayer* player = _audioPlayers[itemObj];
-    if (!player) {
-        NSURL* audioFileURL = [self soundFileOfAudioLightItem:item];
-        NSError* error = nil;
-        player = [[AVAudioPlayer alloc] initWithContentsOfURL:audioFileURL error:&error];
-        if (error) {
-            NSLog(@"Error %@ loading file %@",error,audioFileURL);
-            return nil;
-        }
-        player.numberOfLoops = -1; // loop indefinitely
-        player.volume = 1;
-        _audioPlayers[itemObj] = player;
-    }
-    return player;
-}
 
 -(void) playAudioLightItem:(BSAudioLightItem) item
 {
-    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-    AVAudioSessionRouteDescription *currentRoute = [audioSession currentRoute];
-    NSLog(@"route outputs: %@",[currentRoute outputs]);
-    if(!_audioSessionActivated) {
-        NSError* audioCategoryError = nil;
-        if([audioSession setCategory:AVAudioSessionCategoryPlayback error:&audioCategoryError]) {
-            _audioSessionActivated = YES;
-        } else {
-            NSLog(@"Failed to set audio category: %@",audioCategoryError);
+    dispatch_async([self audioPlayerQueue], ^{
+        if (!_audioPlayers) {
+            _audioPlayers = [NSMutableDictionary dictionaryWithCapacity:4];
         }
-    }
-    AVAudioPlayer* player = [self audioPlayerOfLightItem:item];
-    [player play];
+        id itemObj = @(item);
+        AVAudioPlayer* player = _audioPlayers[itemObj];
+        if (!player) {
+            NSURL* audioFileURL = [self soundFileOfAudioLightItem:item];
+            NSError* error = nil;
+            player = [[AVAudioPlayer alloc] initWithContentsOfURL:audioFileURL error:&error];
+            if (error) {
+                NSLog(@"Error %@ loading file %@",error,audioFileURL);
+                return;
+            }
+            player.numberOfLoops = -1; // loop indefinitely
+            player.volume = 1;
+            _audioPlayers[itemObj] = player;
+        }
+        [player play];
+    });
+}
+
+-(void) pauseAudioLightItem:(BSAudioLightItem) item
+{
+    dispatch_async([self audioPlayerQueue], ^{
+        AVAudioPlayer* player = _audioPlayers[@(item)];
+        [player pause];
+    });
 }
 
 -(void) stopAudioLightItem:(BSAudioLightItem) item
 {
-    // don't use the method since it will allocate on demand.
-    AVAudioPlayer* player = _audioPlayers[@(item)];
-    [player stop];
+    dispatch_async([self audioPlayerQueue], ^{
+        AVAudioPlayer* player = _audioPlayers[@(item)];
+        [player stop];
+    });
 }
 
 
@@ -211,6 +212,66 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
         _activeLightItems &= ~item;
         [self stopAudioLightItem:item];
     }
+    [self checkTwiddleNeeded];
+}
+
+-(void) checkTwiddleNeeded
+{
+    // http://stackoverflow.com/questions/12483843/test-if-a-bitboard-have-only-one-bit-set-to-1
+    const NSUInteger b = _activeLightItems;
+    if (b && !(b & (b-1))) {
+        // only one bit is set. no twiddle needed
+        _twiddleDispatch = nil;
+        [self refreshPlayers];
+    } else {
+        // start twiddle
+        [self twiddleDispatchSource];
+    }
+}
+
+#pragma mark Property Access
+
+-(dispatch_queue_t) audioPlayerQueue
+{
+    if (!_audioPlayerQueue) {
+        // create a serial queue so that we can offload playing the audio at a different queue
+        _audioPlayerQueue = dispatch_queue_create("com.basilsalad.audiolight.players",DISPATCH_QUEUE_SERIAL);
+    }
+    return _audioPlayerQueue;
+}
+
+-(dispatch_source_t) twiddleDispatchSource
+{
+    if (!_twiddleDispatch) {
+        dispatch_source_t twiddleDispatch = _twiddleDispatch = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,[self audioPlayerQueue]);
+        if (twiddleDispatch) {
+            BSAudioLightController __weak* weakSelf = self;
+            BSAudioLightItem __block currentLightedItem = 1;
+            BSAudioLightItem __block previousLightedItem = 0;
+            dispatch_source_set_event_handler(twiddleDispatch, ^{
+                if (!weakSelf) {
+                    return;
+                }
+                BSAudioLightController* strongSelf = weakSelf;
+                NSUInteger activeLightItems = strongSelf->_activeLightItems;
+                if (previousLightedItem) {
+                    [self pauseAudioLightItem:previousLightedItem];
+                }
+                if (currentLightedItem & activeLightItems) {
+                    [self playAudioLightItem:currentLightedItem];
+                    previousLightedItem = currentLightedItem;
+                }
+                
+                currentLightedItem <<= 1;
+                if (currentLightedItem & BSAudioLightItemMax) {
+                    currentLightedItem = 1;
+                }
+            });
+            dispatch_source_set_timer(twiddleDispatch,  DISPATCH_TIME_NOW, BSAudioLightTwiddleInterval, BSAudioLightTwiddleLeeway);
+            dispatch_resume(twiddleDispatch);
+        }
+    }
+    return _twiddleDispatch;
 }
 
 #pragma mark Notification Handlers
@@ -219,20 +280,23 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 -(void) applicationDidReceiveMemoryWarning:(NSNotification*) notification
 {
     // release non-playing audio
-    if (_audioPlayers.count > 0) {
-        NSMutableArray* keysToRemove = [NSMutableArray arrayWithCapacity:_audioPlayers.count];
-        [_audioPlayers enumerateKeysAndObjectsUsingBlock:^(id key, AVAudioPlayer* obj, BOOL *stop) {
-            if (!obj.playing) {
-                [keysToRemove addObject:key];
-            }
-        }];
-        [_audioPlayers removeObjectsForKeys:keysToRemove];
-    }
+    dispatch_async([self audioPlayerQueue], ^{
+        if (_audioPlayers.count > 0) {
+            NSMutableArray* keysToRemove = [NSMutableArray arrayWithCapacity:_audioPlayers.count];
+            [_audioPlayers enumerateKeysAndObjectsUsingBlock:^(id key, AVAudioPlayer* obj, BOOL *stop) {
+                if (!obj.playing) {
+                    [keysToRemove addObject:key];
+                }
+            }];
+            [_audioPlayers removeObjectsForKeys:keysToRemove];
+        }
+    });
 }
 
 -(void) audioSessionRouteChanged:(NSNotification*) notification
 {
     BOOL audioCanPlay = [self refreshPlayers];
+    [self checkTwiddleNeeded];
     NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(audioCanPlay)};
     [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
 }
@@ -240,13 +304,19 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 -(void) mediaServicesWereReset:(NSNotification*) notification
 {
-    _audioPlayers = nil;
+    dispatch_async([self audioPlayerQueue], ^{
+        _audioPlayers = nil;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
 #if TARGET_OS_IPHONE
-    _audioSessionActivated = NO;
+            _audioSessionActivated = NO;
 #endif // TARGET_OS_IPHONE
-    BOOL available = [self refreshPlayers];
-    NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
-    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+            BOOL available = [self refreshPlayers];
+            NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
+
+            [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+        });
+    });
 }
 
 #endif // TARGET_OS_IPHONE
