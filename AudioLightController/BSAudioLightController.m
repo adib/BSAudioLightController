@@ -26,8 +26,8 @@ NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 // in nanoseconds
-const uint64_t BSAudioLightTwiddleInterval = 1000000000L * 0.5;
-const uint64_t BSAudioLightTwiddleLeeway = 0;
+const uint64_t BSAudioLightTwiddleInterval = 1000000000L / 30;
+const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
 
 @interface BSAudioLightController ()
 
@@ -140,28 +140,33 @@ const uint64_t BSAudioLightTwiddleLeeway = 0;
 }
 
 
+-(AVAudioPlayer*) audioPlayerOfLightItem:(BSAudioLightItem) item
+{
+    if (!_audioPlayers) {
+        _audioPlayers = [NSMutableDictionary dictionaryWithCapacity:4];
+    }
+    id itemObj = @(item);
+    AVAudioPlayer* player = _audioPlayers[itemObj];
+    if (!player) {
+        NSURL* audioFileURL = [self soundFileOfAudioLightItem:item];
+        NSError* error = nil;
+        player = [[AVAudioPlayer alloc] initWithContentsOfURL:audioFileURL error:&error];
+        if (error) {
+            NSLog(@"Error %@ loading file %@",error,audioFileURL);
+            return nil;
+        }
+        player.numberOfLoops = -1; // loop indefinitely
+        player.volume = 1;
+        _audioPlayers[itemObj] = player;
+    }
+    return player;
+}
+
 
 -(void) playAudioLightItem:(BSAudioLightItem) item
 {
     dispatch_async([self audioPlayerQueue], ^{
-        if (!_audioPlayers) {
-            _audioPlayers = [NSMutableDictionary dictionaryWithCapacity:4];
-        }
-        id itemObj = @(item);
-        AVAudioPlayer* player = _audioPlayers[itemObj];
-        if (!player) {
-            NSURL* audioFileURL = [self soundFileOfAudioLightItem:item];
-            NSError* error = nil;
-            player = [[AVAudioPlayer alloc] initWithContentsOfURL:audioFileURL error:&error];
-            if (error) {
-                NSLog(@"Error %@ loading file %@",error,audioFileURL);
-                return;
-            }
-            player.numberOfLoops = -1; // loop indefinitely
-            player.volume = 1;
-            _audioPlayers[itemObj] = player;
-        }
-        [player play];
+        [[self audioPlayerOfLightItem:item] play];
     });
 }
 
@@ -254,18 +259,29 @@ const uint64_t BSAudioLightTwiddleLeeway = 0;
                 }
                 BSAudioLightController* strongSelf = weakSelf;
                 NSUInteger activeLightItems = strongSelf->_activeLightItems;
-                if (previousLightedItem) {
-                    [self pauseAudioLightItem:previousLightedItem];
-                }
+                
                 if (currentLightedItem & activeLightItems) {
-                    [self playAudioLightItem:currentLightedItem];
+                    if (previousLightedItem && previousLightedItem != currentLightedItem) {
+                        AVAudioPlayer* prevPlayer = [strongSelf audioPlayerOfLightItem:previousLightedItem];
+                        prevPlayer.volume = 0;
+                    }
+                    AVAudioPlayer* curPlayer = [strongSelf audioPlayerOfLightItem:currentLightedItem];
+                    curPlayer.volume = 1;
+                    [curPlayer play];
                     previousLightedItem = currentLightedItem;
                 }
                 
-                currentLightedItem <<= 1;
-                if (currentLightedItem & BSAudioLightItemMax) {
-                    currentLightedItem = 1;
-                }
+                BSAudioLightItem seek = currentLightedItem << 1;
+                do{
+                    if (seek & activeLightItems) {
+                        break;
+                    }else if (seek & BSAudioLightItemMax) {
+                        seek = 1;
+                    } else {
+                        seek <<= 1;
+                    }
+                } while (seek != currentLightedItem);
+                currentLightedItem = seek;
             });
             dispatch_source_set_timer(twiddleDispatch,  DISPATCH_TIME_NOW, BSAudioLightTwiddleInterval, BSAudioLightTwiddleLeeway);
             dispatch_resume(twiddleDispatch);
