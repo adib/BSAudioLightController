@@ -26,7 +26,7 @@ NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 // in nanoseconds
-const uint64_t BSAudioLightTwiddleInterval = 1000000000L / 30;
+const uint64_t BSAudioLightTwiddleInterval = 1000000000L;
 const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
 
 @interface BSAudioLightController ()
@@ -267,7 +267,9 @@ const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
                     }
                     AVAudioPlayer* curPlayer = [strongSelf audioPlayerOfLightItem:currentLightedItem];
                     curPlayer.volume = 1;
-                    [curPlayer play];
+                    if (!curPlayer.playing) {
+                        [curPlayer play];
+                    }
                     previousLightedItem = currentLightedItem;
                 }
                 
