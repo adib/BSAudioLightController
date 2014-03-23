@@ -40,6 +40,11 @@ typedef enum {
 
 -(BOOL) enabled;
 
+/**
+ Light oscillation frequency in cycles per second.
+ */
+@property (nonatomic) float twiddleFrequency;
+
 @end
 
 extern NSString* const BSAudioLightAvailabilityNotification;

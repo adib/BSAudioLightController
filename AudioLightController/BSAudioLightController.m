@@ -26,8 +26,8 @@ NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 // in nanoseconds
-const uint64_t BSAudioLightTwiddleInterval = 1000000000L;
-const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
+//const uint64_t BSAudioLightTwiddleInterval = 1000000000L;
+//const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
 
 @interface BSAudioLightController ()
 
@@ -59,12 +59,17 @@ const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
 
        // initialize the audio session
         [self enabled];
+        _twiddleFrequency = 1;
     }
     return self;
 }
 
 -(void)dealloc
 {
+    if (_twiddleDispatch) {
+        dispatch_source_cancel(_twiddleDispatch);
+        _twiddleDispatch = nil;
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -226,7 +231,10 @@ const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
     const NSUInteger b = _activeLightItems;
     if (b && !(b & (b-1))) {
         // only one bit is set. no twiddle needed
-        _twiddleDispatch = nil;
+        if (_twiddleDispatch) {
+            dispatch_source_cancel(_twiddleDispatch);
+            _twiddleDispatch = nil;
+        }
         [self refreshPlayers];
     } else {
         // start twiddle
@@ -235,6 +243,19 @@ const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
 }
 
 #pragma mark Property Access
+
+-(void)setTwiddleFrequency:(float)twiddleFrequency
+{
+    if (_twiddleFrequency != twiddleFrequency) {
+        _twiddleFrequency = twiddleFrequency;
+        if (_twiddleDispatch) {
+            // restart twiddle
+            dispatch_source_cancel(_twiddleDispatch);
+            _twiddleDispatch = nil;
+            [self twiddleDispatchSource];
+        }
+    }
+}
 
 -(dispatch_queue_t) audioPlayerQueue
 {
@@ -285,7 +306,11 @@ const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
                 } while (seek != currentLightedItem);
                 currentLightedItem = seek;
             });
-            dispatch_source_set_timer(twiddleDispatch,  DISPATCH_TIME_NOW, BSAudioLightTwiddleInterval, BSAudioLightTwiddleLeeway);
+            float twiddleFrequency = self.twiddleFrequency;
+            // in nanoseconds
+            uint64_t twiddleInterval = round(1000000000L / twiddleFrequency);
+            uint64_t twiddleLeeway =  twiddleInterval / 10;
+            dispatch_source_set_timer(twiddleDispatch,  DISPATCH_TIME_NOW, twiddleInterval, twiddleLeeway);
             dispatch_resume(twiddleDispatch);
         }
     }

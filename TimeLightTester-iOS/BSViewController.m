@@ -25,6 +25,8 @@
 @property (weak, nonatomic) IBOutlet UILabel *headphoneJackLabel;
 
 @property (nonatomic,strong,readonly) BSAudioLightController* audioLightController;
+@property (weak, nonatomic) IBOutlet UISlider *oscillationSlider;
+@property (weak, nonatomic) IBOutlet UILabel *oscillationLabel;
 @end
 
 @implementation BSViewController
@@ -100,6 +102,13 @@
 {
     BOOL active = [sender isOn];
     [self.audioLightController audioLightItem:BSAudioLightItemBuzzer setActive:active];
+}
+
+- (IBAction)oscillationValueChanged:(id)sender
+{
+    float frequency = [(UISlider*)sender value];
+    self.oscillationLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Oscillation frequency: %.2f", @"Label"),frequency];
+    self.audioLightController.twiddleFrequency = frequency;
 }
 
 @end
