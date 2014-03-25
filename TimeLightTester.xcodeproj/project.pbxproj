@@ -421,7 +421,6 @@
 				GCC_PREFIX_HEADER = "TimeLightTester-iOS/TimeLightTester-Prefix.pch";
 				INFOPLIST_FILE = "TimeLightTester-iOS/TimeLightTester-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "5FB93660-2275-4836-9714-8A469A36379E";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -436,7 +435,6 @@
 				GCC_PREFIX_HEADER = "TimeLightTester-iOS/TimeLightTester-Prefix.pch";
 				INFOPLIST_FILE = "TimeLightTester-iOS/TimeLightTester-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "5FB93660-2275-4836-9714-8A469A36379E";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

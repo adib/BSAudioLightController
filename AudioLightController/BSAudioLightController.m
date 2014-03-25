@@ -25,9 +25,8 @@ NSString* const BSAudioLightAvailabilityNotification = @"BSAudioLightAvailabilit
 NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
-// in nanoseconds
-//const uint64_t BSAudioLightTwiddleInterval = 1000000000L;
-//const uint64_t BSAudioLightTwiddleLeeway = BSAudioLightTwiddleInterval / 10;
+
+const float BSAudioLightDefaultFrequency = 5;
 
 @interface BSAudioLightController ()
 
@@ -44,6 +43,7 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 #if TARGET_OS_IPHONE
     BOOL _audioSessionActivated;
 #endif // TARGET_OS_IPHONE
+    BOOL _enabled;
 }
 
 -(id)init
@@ -59,7 +59,7 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
        // initialize the audio session
         [self enabled];
-        _twiddleFrequency = 1;
+        _twiddleFrequency = BSAudioLightDefaultFrequency;
     }
     return self;
 }
@@ -76,10 +76,28 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
 
 -(BOOL) enabled
 {
-    if (![self audioLightEnabled]) {
+    dispatch_queue_t audioPlayerQueue = [self audioPlayerQueue];
+    BSAudioLightController __weak* weakSelf = self;
+    void(^updateEnabled)(BOOL) = ^(BOOL enabled){
+        dispatch_async(audioPlayerQueue, ^{
+            BSAudioLightController* strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            strongSelf->_enabled = enabled;
+        });
+    };
+    if (!_audioLightEnabled) {
+        _audioLightEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:BSAudioLightEnabledPrefKey];
+    }
+    
+
+    if (![_audioLightEnabled boolValue]) {
+        updateEnabled(NO);
         return NO;
     }
     
+    BOOL enabled = YES;
 #if TARGET_OS_IPHONE
     // check the current audio session and only play if it's the audio jack.
     AVAudioSession* audioSession = [AVAudioSession sharedInstance];
@@ -99,24 +117,16 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
                 NSLog(@"Error setting audio category: %@",audioCategoryError);
             }
         }
+        enabled = _audioSessionActivated;
     } else {
-        return NO;
+        enabled = NO;
     }
-    return _audioSessionActivated;
 #else
     // TODO: handle Mac OS X audio jack check
-    return YES;
 #endif // TARGET_OS_IPHONE
     
-
-}
-
--(BOOL) audioLightEnabled
-{
-    if (!_audioLightEnabled) {
-        _audioLightEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:BSAudioLightEnabledPrefKey];
-    }
-    return [_audioLightEnabled boolValue];
+    updateEnabled(enabled);
+    return enabled;
 }
 
 -(NSURL*) soundFileOfAudioLightItem:(BSAudioLightItem) item
@@ -225,6 +235,7 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
     [self checkTwiddleNeeded];
 }
 
+
 -(void) checkTwiddleNeeded
 {
     // http://stackoverflow.com/questions/12483843/test-if-a-bitboard-have-only-one-bit-set-to-1
@@ -275,10 +286,19 @@ NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
             BSAudioLightItem __block currentLightedItem = 1;
             BSAudioLightItem __block previousLightedItem = 0;
             dispatch_source_set_event_handler(twiddleDispatch, ^{
-                if (!weakSelf) {
+                BSAudioLightController* strongSelf = weakSelf;
+                if (!strongSelf) {
                     return;
                 }
-                BSAudioLightController* strongSelf = weakSelf;
+                if (!strongSelf->_enabled) {
+                    dispatch_source_t td = strongSelf->_twiddleDispatch;
+                    if (td) {
+                        dispatch_source_cancel(td);
+                        strongSelf->_twiddleDispatch = nil;
+                    }
+                    return;
+                }
+
                 NSUInteger activeLightItems = strongSelf->_activeLightItems;
                 
                 if (currentLightedItem & activeLightItems) {
