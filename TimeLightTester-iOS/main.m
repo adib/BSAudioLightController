@@ -19,11 +19,11 @@
 
 #import <UIKit/UIKit.h>
 
-#import "BSAppDelegate.h"
+#import "BSAppDelegateIOS.h"
 
 int main(int argc, char * argv[])
 {
     @autoreleasepool {
-        return UIApplicationMain(argc, argv, nil, NSStringFromClass([BSAppDelegate class]));
+        return UIApplicationMain(argc, argv, nil, NSStringFromClass([BSAppDelegateIOS class]));
     }
 }

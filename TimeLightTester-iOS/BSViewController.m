@@ -45,8 +45,6 @@
     
     BOOL audioLightEnabled = [self.audioLightController enabled];
     self.headphoneJackLabel.text = audioLightEnabled ? NSLocalizedString(@"Audio Light Enabled",@"Indicator")  :NSLocalizedString(@"Audio Light Disabled",@"Indicator");
-
-    self.headphoneJackLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Enabled: %@", @"Indicator"),@([self.audioLightController enabled])];
 }
 
 -(void)viewWillAppear:(BOOL)animated

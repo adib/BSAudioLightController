@@ -123,6 +123,8 @@ const float BSAudioLightDefaultFrequency = 5;
     }
 #else
     // TODO: handle Mac OS X audio jack check
+    // http://stackoverflow.com/questions/14483083/how-to-get-notifications-when-the-headphones-are-plugged-in-out-mac
+    
 #endif // TARGET_OS_IPHONE
     
     updateEnabled(enabled);
@@ -181,7 +183,9 @@ const float BSAudioLightDefaultFrequency = 5;
 -(void) playAudioLightItem:(BSAudioLightItem) item
 {
     dispatch_async([self audioPlayerQueue], ^{
-        [[self audioPlayerOfLightItem:item] play];
+        AVAudioPlayer* player = [self audioPlayerOfLightItem:item];
+        player.volume = 1;
+        [player play];
     });
 }
 

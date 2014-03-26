@@ -17,11 +17,14 @@
 //  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "BSAppDelegate.h"
+#import "BSAppDelegateIOS.h"
 #import "BSAudioLightController.h"
 
+@interface BSAppDelegateIOS ()
 
-@implementation BSAppDelegate
+@end
+
+@implementation BSAppDelegateIOS
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
