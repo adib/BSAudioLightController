@@ -17,13 +17,28 @@
 //  THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+
 @import AVFoundation;
+
+#if !TARGET_OS_IPHONE
+#import <CoreAudio/CoreAudio.h>
+#endif
+
 
 #import "BSAudioLightController.h"
 
 NSString* const BSAudioLightAvailabilityNotification = @"BSAudioLightAvailabilityNotification";
 NSString* const BSAudioLightEnabledPrefKey = @"BSAudioLightEnabledPrefKey";
 NSString* const BSAudioLightAvailabilityKey = @"BSAudioLightAvailabilityKey";
+
+
+#if !TARGET_OS_IPHONE
+const AudioObjectPropertyAddress BSAudioLightControllerSourceAddress = {
+    kAudioDevicePropertyDataSource,
+    kAudioDevicePropertyScopeOutput,
+    kAudioObjectPropertyElementMaster
+};
+#endif
 
 
 const float BSAudioLightDefaultFrequency = 5;
@@ -42,6 +57,9 @@ const float BSAudioLightDefaultFrequency = 5;
     dispatch_source_t _twiddleDispatch;
 #if TARGET_OS_IPHONE
     BOOL _audioSessionActivated;
+#else
+    AudioObjectID _audioObjectID;
+    AudioObjectPropertyListenerBlock _audioObjectPropertyListener;
 #endif // TARGET_OS_IPHONE
     BOOL _enabled;
 }
@@ -70,9 +88,24 @@ const float BSAudioLightDefaultFrequency = 5;
         dispatch_source_cancel(_twiddleDispatch);
         _twiddleDispatch = nil;
     }
+#if !TARGET_OS_IPHONE
+    [self removeAudioObjectPropertyListener];
+#endif
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+
+#if !TARGET_OS_IPHONE
+-(void) removeAudioObjectPropertyListener
+{
+    if (_audioObjectPropertyListener) {
+        OSStatus result = AudioObjectRemovePropertyListenerBlock([self audioObjectID], &BSAudioLightControllerSourceAddress, dispatch_get_main_queue(), _audioObjectPropertyListener);
+        if (result == noErr) {
+            _audioObjectPropertyListener= nil;
+        }
+    }
+}
+#endif
 
 -(BOOL) enabled
 {
@@ -84,48 +117,67 @@ const float BSAudioLightDefaultFrequency = 5;
             if (!strongSelf) {
                 return;
             }
+            BOOL oldEnabled = strongSelf->_enabled;
             strongSelf->_enabled = enabled;
+            if (oldEnabled != enabled) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(enabled)};
+                    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+                });
+            }
         });
     };
     if (!_audioLightEnabled) {
         _audioLightEnabled = [[NSUserDefaults standardUserDefaults] objectForKey:BSAudioLightEnabledPrefKey];
     }
-    
 
     if (![_audioLightEnabled boolValue]) {
         updateEnabled(NO);
+#if !TARGET_OS_IPHONE
+        [self removeAudioObjectPropertyListener];
+#endif
         return NO;
     }
     
     BOOL enabled = YES;
-#if TARGET_OS_IPHONE
+    {
     // check the current audio session and only play if it's the audio jack.
-    AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-    AVAudioSessionRouteDescription* currentRoute = [audioSession currentRoute];
-    NSArray* outputs = [currentRoute outputs];
-    if (outputs.count == 1 && [AVAudioSessionPortHeadphones isEqual:[outputs[0] portType]]) {
-        if (!_audioSessionActivated) {
-            NSError* audioCategoryError = nil;
-            if ([audioSession setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionDuckOthers error:&audioCategoryError]) {
-                NSError* audioSessionActivationError = nil;
-                if ([audioSession setActive:YES error:&audioSessionActivationError]) {
-                    _audioSessionActivated = YES;
+#if TARGET_OS_IPHONE
+        AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+        AVAudioSessionRouteDescription* currentRoute = [audioSession currentRoute];
+        NSArray* outputs = [currentRoute outputs];
+        if (outputs.count == 1 && [AVAudioSessionPortHeadphones isEqual:[outputs[0] portType]]) {
+            if (!_audioSessionActivated) {
+                NSError* audioCategoryError = nil;
+                if ([audioSession setCategory:AVAudioSessionCategoryPlayback withOptions:AVAudioSessionCategoryOptionDuckOthers error:&audioCategoryError]) {
+                    NSError* audioSessionActivationError = nil;
+                    if ([audioSession setActive:YES error:&audioSessionActivationError]) {
+                        _audioSessionActivated = YES;
+                    } else {
+                        NSLog(@"Error activating audio session: %@",audioSessionActivationError);
+                    }
                 } else {
-                    NSLog(@"Error activating audio session: %@",audioSessionActivationError);
+                    NSLog(@"Error setting audio category: %@",audioCategoryError);
                 }
-            } else {
-                NSLog(@"Error setting audio category: %@",audioCategoryError);
             }
+            enabled = _audioSessionActivated;
+        } else {
+            enabled = NO;
         }
-        enabled = _audioSessionActivated;
-    } else {
-        enabled = NO;
-    }
 #else
-    // TODO: handle Mac OS X audio jack check
-    // http://stackoverflow.com/questions/14483083/how-to-get-notifications-when-the-headphones-are-plugged-in-out-mac
+        // TODO: handle Mac OS X audio jack check
+        // http://stackoverflow.com/questions/14483083/how-to-get-notifications-when-the-headphones-are-plugged-in-out-mac
+
+        const AudioObjectID audioObjectID = [self audioObjectID];
     
+        UInt32 dataSourceId = 0;
+        UInt32 dataSourceIdSize = sizeof(UInt32);
+        AudioObjectGetPropertyData(audioObjectID, &BSAudioLightControllerSourceAddress, 0, NULL, &dataSourceIdSize, &dataSourceId);
+        enabled = dataSourceId == 'hdpn';
+    
+        [self audioObjectPropertyListener];
 #endif // TARGET_OS_IPHONE
+    }
     
     updateEnabled(enabled);
     return enabled;
@@ -221,6 +273,19 @@ const float BSAudioLightDefaultFrequency = 5;
     refreshPlayer(BSAudioLightItemYellow);
     refreshPlayer(BSAudioLightItemRed);
     refreshPlayer(BSAudioLightItemBuzzer);
+    
+    const NSUInteger b = _activeLightItems;
+    if (audioCanPlay && !(b && !(b & (b-1))) ) {
+        // http://stackoverflow.com/questions/12483843/test-if-a-bitboard-have-only-one-bit-set-to-1
+        // more than one bit is set.
+        [self twiddleDispatchSource];
+    } else {
+        if (_twiddleDispatch) {
+            dispatch_source_cancel(_twiddleDispatch);
+            _twiddleDispatch = nil;
+        }
+    }
+
     return audioCanPlay;
 }
 
@@ -229,33 +294,13 @@ const float BSAudioLightDefaultFrequency = 5;
 {
     if (active) {
         _activeLightItems |= item;
-        if ([self enabled]) {
-            [self playAudioLightItem:item];
-        }
     } else {
         _activeLightItems &= ~item;
-        [self stopAudioLightItem:item];
     }
-    [self checkTwiddleNeeded];
+    [self refreshPlayers];
 }
 
 
--(void) checkTwiddleNeeded
-{
-    // http://stackoverflow.com/questions/12483843/test-if-a-bitboard-have-only-one-bit-set-to-1
-    const NSUInteger b = _activeLightItems;
-    if (b && !(b & (b-1))) {
-        // only one bit is set. no twiddle needed
-        if (_twiddleDispatch) {
-            dispatch_source_cancel(_twiddleDispatch);
-            _twiddleDispatch = nil;
-        }
-        [self refreshPlayers];
-    } else {
-        // start twiddle
-        [self twiddleDispatchSource];
-    }
-}
 
 #pragma mark Property Access
 
@@ -341,6 +386,50 @@ const float BSAudioLightDefaultFrequency = 5;
     return _twiddleDispatch;
 }
 
+#if !TARGET_OS_IPHONE
+-(AudioObjectID) audioObjectID
+{
+    if (!_audioObjectID) {
+        // TODO find the built-in output
+        AudioObjectID defaultDevice = 0;
+        UInt32 defaultSize = sizeof(AudioDeviceID);
+        
+        const AudioObjectPropertyAddress defaultAddress = {
+            kAudioHardwarePropertyDefaultOutputDevice,
+            kAudioObjectPropertyScopeGlobal,
+            kAudioObjectPropertyElementMaster
+        };
+
+        OSStatus error = AudioObjectGetPropertyData(kAudioObjectSystemObject, &defaultAddress, 0, NULL, &defaultSize, &defaultDevice);
+        
+
+        if (error == noErr) {
+            _audioObjectID = defaultDevice;
+        }
+    }
+    return _audioObjectID;
+}
+
+-(AudioObjectPropertyListenerBlock) audioObjectPropertyListener
+{
+    if (!_audioObjectPropertyListener) {
+        BSAudioLightController __weak* weakSelf = self;
+         _audioObjectPropertyListener = ^(UInt32                 inNumberAddresses, const AudioObjectPropertyAddress    inAddresses[]) {
+            BSAudioLightController* strongSelf = weakSelf;
+            if (!strongSelf) {
+                return;
+            }
+            // update the enabled flag
+            [strongSelf refreshPlayers];
+        };
+        const AudioObjectID audioObjectID = [self audioObjectID];
+        AudioObjectAddPropertyListenerBlock(audioObjectID, &BSAudioLightControllerSourceAddress, dispatch_get_main_queue(),_audioObjectPropertyListener);
+    }
+    return _audioObjectPropertyListener;
+}
+
+#endif // !TARGET_OS_IPHONE
+
 #pragma mark Notification Handlers
 
 #if TARGET_OS_IPHONE
@@ -362,10 +451,7 @@ const float BSAudioLightDefaultFrequency = 5;
 
 -(void) audioSessionRouteChanged:(NSNotification*) notification
 {
-    BOOL audioCanPlay = [self refreshPlayers];
-    [self checkTwiddleNeeded];
-    NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(audioCanPlay)};
-    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+    [self refreshPlayers];
 }
 
 
@@ -373,15 +459,9 @@ const float BSAudioLightDefaultFrequency = 5;
 {
     dispatch_async([self audioPlayerQueue], ^{
         _audioPlayers = nil;
-        
         dispatch_async(dispatch_get_main_queue(), ^{
-#if TARGET_OS_IPHONE
             _audioSessionActivated = NO;
-#endif // TARGET_OS_IPHONE
-            BOOL available = [self refreshPlayers];
-            NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
-
-            [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+            [self refreshPlayers];
         });
     });
 }
@@ -394,9 +474,7 @@ const float BSAudioLightDefaultFrequency = 5;
     NSNumber* updatedAudioLightEnabled =  [[NSUserDefaults standardUserDefaults] objectForKey:BSAudioLightEnabledPrefKey];
     if ([updatedAudioLightEnabled boolValue] != [_audioLightEnabled boolValue]) {
         _audioLightEnabled = updatedAudioLightEnabled;
-        BOOL available = [self refreshPlayers];
-        NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(available)};
-        [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+        [self refreshPlayers];
     }
 }
 @end

@@ -678,7 +678,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="noi-NO-Nm2">
-                        <rect key="frame" x="18" y="151" width="129" height="17"/>
+                        <rect key="frame" x="18" y="151" width="238" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Enabled: (unknown)" id="zFS-Ur-xXU">
                             <font key="font" metaFont="system"/>

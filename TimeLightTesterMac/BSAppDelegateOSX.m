@@ -31,7 +31,7 @@
     [nc addObserver:self selector:@selector(audioLightAvailability:) name:BSAudioLightAvailabilityNotification object:nil];
     
     BOOL audioLightEnabled = [self.audioLightController enabled];
-    self.headphoneJackLabel.stringValue = audioLightEnabled ? NSLocalizedString(@"Audio Light Enabled",@"Indicator")  :NSLocalizedString(@"Audio Light Disabled",@"Indicator");
+    self.headphoneJackLabel.stringValue = audioLightEnabled ? NSLocalizedString(@"Audio Light Connected",@"Indicator")  :NSLocalizedString(@"Audio Light Disconnected",@"Indicator");
     
 }
 
@@ -41,7 +41,7 @@
 -(void) audioLightAvailability:(NSNotification*) notification
 {
     BOOL audioLightEnabled = [notification.userInfo[BSAudioLightAvailabilityKey] boolValue];
-    self.headphoneJackLabel.stringValue = audioLightEnabled ? NSLocalizedString(@"Audio Light Enabled",@"Indicator")  :NSLocalizedString(@"Audio Light Disabled",@"Indicator");
+    self.headphoneJackLabel.stringValue = audioLightEnabled ? NSLocalizedString(@"Audio Light Connected",@"Indicator")  :NSLocalizedString(@"Audio Light Disconnected",@"Indicator");
 }
 
 #pragma mark Property Access
