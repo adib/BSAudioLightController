@@ -122,7 +122,7 @@ const float BSAudioLightDefaultFrequency = 5;
             if (oldEnabled != enabled) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     NSDictionary* userInfo = @{BSAudioLightAvailabilityKey : @(enabled)};
-                    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:self userInfo:userInfo];
+                    [[NSNotificationCenter defaultCenter] postNotificationName:BSAudioLightAvailabilityNotification object:strongSelf userInfo:userInfo];
                 });
             }
         });
@@ -165,11 +165,8 @@ const float BSAudioLightDefaultFrequency = 5;
             enabled = NO;
         }
 #else
-        // TODO: handle Mac OS X audio jack check
         // http://stackoverflow.com/questions/14483083/how-to-get-notifications-when-the-headphones-are-plugged-in-out-mac
-
         const AudioObjectID audioObjectID = [self audioObjectID];
-    
         UInt32 dataSourceId = 0;
         UInt32 dataSourceIdSize = sizeof(UInt32);
         AudioObjectGetPropertyData(audioObjectID, &BSAudioLightControllerSourceAddress, 0, NULL, &dataSourceIdSize, &dataSourceId);
@@ -182,6 +179,7 @@ const float BSAudioLightDefaultFrequency = 5;
     updateEnabled(enabled);
     return enabled;
 }
+
 
 -(NSURL*) soundFileOfAudioLightItem:(BSAudioLightItem) item
 {
@@ -208,7 +206,6 @@ const float BSAudioLightDefaultFrequency = 5;
     return nil;
 }
 
-
 -(AVAudioPlayer*) audioPlayerOfLightItem:(BSAudioLightItem) item
 {
     if (!_audioPlayers) {
@@ -230,7 +227,6 @@ const float BSAudioLightDefaultFrequency = 5;
     }
     return player;
 }
-
 
 -(void) playAudioLightItem:(BSAudioLightItem) item
 {
@@ -299,7 +295,6 @@ const float BSAudioLightDefaultFrequency = 5;
     }
     [self refreshPlayers];
 }
-
 
 
 #pragma mark Property Access
