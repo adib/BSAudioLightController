@@ -28,6 +28,7 @@
 		C034274018E300470063B69A /* timelight_red.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B818BE22570036B89D /* timelight_red.aiff */; };
 		C034274118E300470063B69A /* timelight_yellow.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B918BE22570036B89D /* timelight_yellow.aiff */; };
 		C034274218E300470063B69A /* timelight_green.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32BA18BE22570036B89D /* timelight_green.aiff */; };
+		C034274418E30A730063B69A /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C034274318E30A730063B69A /* CoreAudio.framework */; };
 		C052976518BB8D9B001451C4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976418BB8D9B001451C4 /* Foundation.framework */; };
 		C052976718BB8D9B001451C4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976618BB8D9B001451C4 /* CoreGraphics.framework */; };
 		C052976918BB8D9B001451C4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976818BB8D9B001451C4 /* UIKit.framework */; };
@@ -86,6 +87,7 @@
 		C034273218E300140063B69A /* TimeLightTesterMacTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TimeLightTesterMacTests-Info.plist"; sourceTree = "<group>"; };
 		C034273418E300140063B69A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C034273618E300140063B69A /* TimeLightTesterMacTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TimeLightTesterMacTests.m; sourceTree = "<group>"; };
+		C034274318E30A730063B69A /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/System/Library/Frameworks/CoreAudio.framework; sourceTree = DEVELOPER_DIR; };
 		C052976118BB8D9B001451C4 /* TimeLightTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimeLightTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C052976418BB8D9B001451C4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C052976618BB8D9B001451C4 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -112,6 +114,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C034274418E30A730063B69A /* CoreAudio.framework in Frameworks */,
 				C034270E18E300130063B69A /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -240,6 +243,7 @@
 		C052976318BB8D9B001451C4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C034274318E30A730063B69A /* CoreAudio.framework */,
 				C052976418BB8D9B001451C4 /* Foundation.framework */,
 				C052976618BB8D9B001451C4 /* CoreGraphics.framework */,
 				C052976818BB8D9B001451C4 /* UIKit.framework */,

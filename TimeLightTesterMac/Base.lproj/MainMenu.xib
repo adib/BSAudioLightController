@@ -696,7 +696,7 @@
                         </textFieldCell>
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Te-rt-ZTY">
-                        <rect key="frame" x="18" y="96" width="70" height="17"/>
+                        <rect key="frame" x="18" y="96" width="238" height="17"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Oscillation" id="3j3-iP-5Uc">
                             <font key="font" metaFont="system"/>
@@ -707,7 +707,11 @@
                     <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Yk-h7-E7F">
                         <rect key="frame" x="18" y="69" width="235" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="30" doubleValue="5" tickMarkPosition="above" sliderType="linear" id="sfE-dX-ryP"/>
+                        <sliderCell key="cell" state="on" alignment="left" minValue="1" maxValue="30" doubleValue="5" tickMarkPosition="above" sliderType="linear" id="sfE-dX-ryP">
+                            <connections>
+                                <action selector="oscillationValueChanged:" target="Voe-Tx-rLC" id="Lu9-YG-iyL"/>
+                            </connections>
+                        </sliderCell>
                     </slider>
                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XUm-r2-gKM">
                         <rect key="frame" x="18" y="274" width="96" height="18"/>
