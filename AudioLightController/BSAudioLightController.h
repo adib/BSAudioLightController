@@ -40,6 +40,8 @@ typedef enum {
 
 -(BOOL) enabled;
 
+-(void) reset;
+
 /**
  Light oscillation frequency in cycles per second.
  */

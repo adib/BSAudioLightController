@@ -260,6 +260,21 @@ const float BSAudioLightDefaultFrequency = 5;
     });
 }
 
+-(void) reset
+{
+    if (_activeLightItems != 0) {
+        _activeLightItems = 0;
+        dispatch_async([self audioPlayerQueue], ^{
+            [_audioPlayers enumerateKeysAndObjectsUsingBlock:^(id key, AVAudioPlayer* player, BOOL *stop) {
+                if ([player isPlaying]) {
+                    [player stop];
+                }
+            }];
+            _audioPlayers = nil;
+        });
+    }
+}
+
 
 -(BOOL) refreshPlayers
 {
@@ -288,6 +303,8 @@ const float BSAudioLightDefaultFrequency = 5;
 
     return audioCanPlay;
 }
+
+
 
 
 -(void)audioLightItem:(BSAudioLightItem)item setActive:(BOOL)active
@@ -373,7 +390,7 @@ const float BSAudioLightDefaultFrequency = 5;
             });
             float twiddleFrequency = self.twiddleFrequency;
             // in nanoseconds
-            uint64_t twiddleInterval = round(1000000000L / twiddleFrequency);
+            uint64_t twiddleInterval = round(NSEC_PER_SEC / twiddleFrequency);
             uint64_t twiddleLeeway =  twiddleInterval / 10;
             dispatch_source_set_timer(twiddleDispatch,  DISPATCH_TIME_NOW, twiddleInterval, twiddleLeeway);
             dispatch_resume(twiddleDispatch);
