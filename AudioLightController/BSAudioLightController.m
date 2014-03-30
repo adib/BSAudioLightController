@@ -84,14 +84,12 @@ const float BSAudioLightDefaultFrequency = 5;
 
 -(void)dealloc
 {
-    if (_twiddleDispatch) {
-        dispatch_source_cancel(_twiddleDispatch);
-        _twiddleDispatch = nil;
-    }
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+    [self removeTwiddleDispatch];
 #if !TARGET_OS_IPHONE
     [self removeAudioObjectPropertyListener];
 #endif
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 
@@ -106,6 +104,15 @@ const float BSAudioLightDefaultFrequency = 5;
     }
 }
 #endif
+
+
+-(void) removeTwiddleDispatch
+{
+    if (_twiddleDispatch) {
+        dispatch_source_cancel(_twiddleDispatch);
+        _twiddleDispatch = nil;
+    }
+}
 
 -(BOOL) enabled
 {
@@ -276,10 +283,7 @@ const float BSAudioLightDefaultFrequency = 5;
         // more than one bit is set.
         [self twiddleDispatchSource];
     } else {
-        if (_twiddleDispatch) {
-            dispatch_source_cancel(_twiddleDispatch);
-            _twiddleDispatch = nil;
-        }
+        [self removeTwiddleDispatch];
     }
 
     return audioCanPlay;
@@ -305,8 +309,7 @@ const float BSAudioLightDefaultFrequency = 5;
         _twiddleFrequency = twiddleFrequency;
         if (_twiddleDispatch) {
             // restart twiddle
-            dispatch_source_cancel(_twiddleDispatch);
-            _twiddleDispatch = nil;
+            [self removeTwiddleDispatch];
             [self twiddleDispatchSource];
         }
     }
@@ -335,11 +338,9 @@ const float BSAudioLightDefaultFrequency = 5;
                     return;
                 }
                 if (!strongSelf->_enabled) {
-                    dispatch_source_t td = strongSelf->_twiddleDispatch;
-                    if (td) {
-                        dispatch_source_cancel(td);
-                        strongSelf->_twiddleDispatch = nil;
-                    }
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [strongSelf removeTwiddleDispatch];
+                    });
                     return;
                 }
 
@@ -397,7 +398,6 @@ const float BSAudioLightDefaultFrequency = 5;
 
         OSStatus error = AudioObjectGetPropertyData(kAudioObjectSystemObject, &defaultAddress, 0, NULL, &defaultSize, &defaultDevice);
         
-
         if (error == noErr) {
             _audioObjectID = defaultDevice;
         }
@@ -448,7 +448,6 @@ const float BSAudioLightDefaultFrequency = 5;
 {
     [self refreshPlayers];
 }
-
 
 -(void) mediaServicesWereReset:(NSNotification*) notification
 {

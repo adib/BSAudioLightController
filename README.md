@@ -1,6 +1,6 @@
 # Time Light Tester
 
-Tester app and driver of the [Time-a-Light](http://www.time-a-light.com) traffic light device.
+Tester app and driver of the [Time-a-Light](http://www.time-a-light.com) traffic light device, for iOS and OS X.
 
 ## Setup
 
@@ -30,7 +30,7 @@ Red    | 3000 Hz      | -
 Buzzer | -            | 1500 Hz
 
  
-As of this writing only one light or the buzzer can be active at one time due to Time-a-light's hardware constraints.
+As of this writing only one light or the buzzer can be active at one time due to Time-a-light's hardware constraints. The driver gets around this limitation by cycling the tones when more than one light is supposed to be active, giving a blinking light effect. Testing shows that 5Hz is the fastest rate that the device can recognize tone changes.
 
 ## License
 
