@@ -20,10 +20,6 @@
 
 @import AVFoundation;
 
-#if !TARGET_OS_IPHONE
-#import <CoreAudio/CoreAudio.h>
-#endif
-
 
 #import "BSAudioLightController.h"
 
