@@ -7,11 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C01F32B618BE223D0036B89D /* BSAudioLightController.m in Sources */ = {isa = PBXBuildFile; fileRef = C01F32B518BE223D0036B89D /* BSAudioLightController.m */; };
-		C01F32BB18BE22570036B89D /* timelight_buzzer.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B718BE22570036B89D /* timelight_buzzer.aiff */; };
-		C01F32BC18BE22570036B89D /* timelight_red.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B818BE22570036B89D /* timelight_red.aiff */; };
-		C01F32BD18BE22570036B89D /* timelight_yellow.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B918BE22570036B89D /* timelight_yellow.aiff */; };
-		C01F32BE18BE22570036B89D /* timelight_green.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32BA18BE22570036B89D /* timelight_green.aiff */; };
 		C034270E18E300130063B69A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C034270D18E300130063B69A /* Cocoa.framework */; };
 		C034271818E300130063B69A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C034271618E300130063B69A /* InfoPlist.strings */; };
 		C034271A18E300130063B69A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C034271918E300130063B69A /* main.m */; };
@@ -23,12 +18,6 @@
 		C034272D18E300140063B69A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C034270D18E300130063B69A /* Cocoa.framework */; };
 		C034273518E300140063B69A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C034273318E300140063B69A /* InfoPlist.strings */; };
 		C034273718E300140063B69A /* TimeLightTesterMacTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C034273618E300140063B69A /* TimeLightTesterMacTests.m */; };
-		C034273E18E300430063B69A /* BSAudioLightController.m in Sources */ = {isa = PBXBuildFile; fileRef = C01F32B518BE223D0036B89D /* BSAudioLightController.m */; };
-		C034273F18E300470063B69A /* timelight_buzzer.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B718BE22570036B89D /* timelight_buzzer.aiff */; };
-		C034274018E300470063B69A /* timelight_red.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B818BE22570036B89D /* timelight_red.aiff */; };
-		C034274118E300470063B69A /* timelight_yellow.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32B918BE22570036B89D /* timelight_yellow.aiff */; };
-		C034274218E300470063B69A /* timelight_green.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C01F32BA18BE22570036B89D /* timelight_green.aiff */; };
-		C034274418E30A730063B69A /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C034274318E30A730063B69A /* CoreAudio.framework */; };
 		C052976518BB8D9B001451C4 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976418BB8D9B001451C4 /* Foundation.framework */; };
 		C052976718BB8D9B001451C4 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976618BB8D9B001451C4 /* CoreGraphics.framework */; };
 		C052976918BB8D9B001451C4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976818BB8D9B001451C4 /* UIKit.framework */; };
@@ -43,6 +32,16 @@
 		C052978618BB8D9C001451C4 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C052976818BB8D9B001451C4 /* UIKit.framework */; };
 		C052978E18BB8D9C001451C4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C052978C18BB8D9C001451C4 /* InfoPlist.strings */; };
 		C052979018BB8D9C001451C4 /* TimeLightTesterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C052978F18BB8D9C001451C4 /* TimeLightTesterTests.m */; };
+		C0E265D3192252C400409AAF /* BSAudioLightController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0E265D2192252C400409AAF /* BSAudioLightController.m */; };
+		C0E265D4192252C400409AAF /* BSAudioLightController.m in Sources */ = {isa = PBXBuildFile; fileRef = C0E265D2192252C400409AAF /* BSAudioLightController.m */; };
+		C0E265D9192252D300409AAF /* timelight_buzzer.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D5192252D300409AAF /* timelight_buzzer.aiff */; };
+		C0E265DA192252D300409AAF /* timelight_buzzer.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D5192252D300409AAF /* timelight_buzzer.aiff */; };
+		C0E265DB192252D300409AAF /* timelight_red.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D6192252D300409AAF /* timelight_red.aiff */; };
+		C0E265DC192252D300409AAF /* timelight_red.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D6192252D300409AAF /* timelight_red.aiff */; };
+		C0E265DD192252D300409AAF /* timelight_yellow.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D7192252D300409AAF /* timelight_yellow.aiff */; };
+		C0E265DE192252D300409AAF /* timelight_yellow.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D7192252D300409AAF /* timelight_yellow.aiff */; };
+		C0E265DF192252D300409AAF /* timelight_green.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D8192252D300409AAF /* timelight_green.aiff */; };
+		C0E265E0192252D300409AAF /* timelight_green.aiff in Resources */ = {isa = PBXBuildFile; fileRef = C0E265D8192252D300409AAF /* timelight_green.aiff */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,12 +62,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C01F32B418BE223D0036B89D /* BSAudioLightController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BSAudioLightController.h; sourceTree = "<group>"; };
-		C01F32B518BE223D0036B89D /* BSAudioLightController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BSAudioLightController.m; sourceTree = "<group>"; };
-		C01F32B718BE22570036B89D /* timelight_buzzer.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = timelight_buzzer.aiff; sourceTree = "<group>"; };
-		C01F32B818BE22570036B89D /* timelight_red.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = timelight_red.aiff; sourceTree = "<group>"; };
-		C01F32B918BE22570036B89D /* timelight_yellow.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = timelight_yellow.aiff; sourceTree = "<group>"; };
-		C01F32BA18BE22570036B89D /* timelight_green.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = timelight_green.aiff; sourceTree = "<group>"; };
 		C034270C18E300130063B69A /* TimeLightTesterMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimeLightTesterMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C034270D18E300130063B69A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		C034271018E300130063B69A /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -107,6 +100,12 @@
 		C052978B18BB8D9C001451C4 /* TimeLightTesterTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "TimeLightTesterTests-Info.plist"; sourceTree = "<group>"; };
 		C052978D18BB8D9C001451C4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C052978F18BB8D9C001451C4 /* TimeLightTesterTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TimeLightTesterTests.m; sourceTree = "<group>"; };
+		C0E265D1192252C400409AAF /* BSAudioLightController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BSAudioLightController.h; path = ../Classes/BSAudioLightController.h; sourceTree = "<group>"; };
+		C0E265D2192252C400409AAF /* BSAudioLightController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BSAudioLightController.m; path = ../Classes/BSAudioLightController.m; sourceTree = "<group>"; };
+		C0E265D5192252D300409AAF /* timelight_buzzer.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = timelight_buzzer.aiff; path = ../Assets/timelight_buzzer.aiff; sourceTree = "<group>"; };
+		C0E265D6192252D300409AAF /* timelight_red.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = timelight_red.aiff; path = ../Assets/timelight_red.aiff; sourceTree = "<group>"; };
+		C0E265D7192252D300409AAF /* timelight_yellow.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = timelight_yellow.aiff; path = ../Assets/timelight_yellow.aiff; sourceTree = "<group>"; };
+		C0E265D8192252D300409AAF /* timelight_green.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; name = timelight_green.aiff; path = ../Assets/timelight_green.aiff; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,7 +113,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C034274418E30A730063B69A /* CoreAudio.framework in Frameworks */,
 				C034270E18E300130063B69A /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -151,19 +149,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		C01F32B318BE223D0036B89D /* AudioLightController */ = {
-			isa = PBXGroup;
-			children = (
-				C01F32B718BE22570036B89D /* timelight_buzzer.aiff */,
-				C01F32B818BE22570036B89D /* timelight_red.aiff */,
-				C01F32B918BE22570036B89D /* timelight_yellow.aiff */,
-				C01F32BA18BE22570036B89D /* timelight_green.aiff */,
-				C01F32B418BE223D0036B89D /* BSAudioLightController.h */,
-				C01F32B518BE223D0036B89D /* BSAudioLightController.m */,
-			);
-			path = AudioLightController;
-			sourceTree = "<group>";
-		};
 		C034270F18E300130063B69A /* Other Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -219,7 +204,12 @@
 		C052975818BB8D9B001451C4 = {
 			isa = PBXGroup;
 			children = (
-				C01F32B318BE223D0036B89D /* AudioLightController */,
+				C0E265D5192252D300409AAF /* timelight_buzzer.aiff */,
+				C0E265D6192252D300409AAF /* timelight_red.aiff */,
+				C0E265D7192252D300409AAF /* timelight_yellow.aiff */,
+				C0E265D8192252D300409AAF /* timelight_green.aiff */,
+				C0E265D1192252C400409AAF /* BSAudioLightController.h */,
+				C0E265D2192252C400409AAF /* BSAudioLightController.m */,
 				C052976A18BB8D9B001451C4 /* TimeLightTester-iOS */,
 				C052978918BB8D9C001451C4 /* TimeLightTesterTests */,
 				C034271318E300130063B69A /* TimeLightTesterMac */,
@@ -418,13 +408,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				C034271818E300130063B69A /* InfoPlist.strings in Resources */,
-				C034274118E300470063B69A /* timelight_yellow.aiff in Resources */,
+				C0E265DE192252D300409AAF /* timelight_yellow.aiff in Resources */,
 				C034272618E300130063B69A /* Images.xcassets in Resources */,
 				C034271E18E300130063B69A /* Credits.rtf in Resources */,
-				C034273F18E300470063B69A /* timelight_buzzer.aiff in Resources */,
+				C0E265DA192252D300409AAF /* timelight_buzzer.aiff in Resources */,
 				C034272418E300130063B69A /* MainMenu.xib in Resources */,
-				C034274018E300470063B69A /* timelight_red.aiff in Resources */,
-				C034274218E300470063B69A /* timelight_green.aiff in Resources */,
+				C0E265DC192252D300409AAF /* timelight_red.aiff in Resources */,
+				C0E265E0192252D300409AAF /* timelight_green.aiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -441,12 +431,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				C052977D18BB8D9B001451C4 /* Images.xcassets in Resources */,
-				C01F32BD18BE22570036B89D /* timelight_yellow.aiff in Resources */,
-				C01F32BB18BE22570036B89D /* timelight_buzzer.aiff in Resources */,
+				C0E265DD192252D300409AAF /* timelight_yellow.aiff in Resources */,
+				C0E265D9192252D300409AAF /* timelight_buzzer.aiff in Resources */,
 				C052976F18BB8D9B001451C4 /* InfoPlist.strings in Resources */,
 				C052977818BB8D9B001451C4 /* Main.storyboard in Resources */,
-				C01F32BC18BE22570036B89D /* timelight_red.aiff in Resources */,
-				C01F32BE18BE22570036B89D /* timelight_green.aiff in Resources */,
+				C0E265DB192252D300409AAF /* timelight_red.aiff in Resources */,
+				C0E265DF192252D300409AAF /* timelight_green.aiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -466,7 +456,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C034271A18E300130063B69A /* main.m in Sources */,
-				C034273E18E300430063B69A /* BSAudioLightController.m in Sources */,
+				C0E265D4192252C400409AAF /* BSAudioLightController.m in Sources */,
 				C034272118E300130063B69A /* BSAppDelegateOSX.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -485,7 +475,7 @@
 			files = (
 				C052977B18BB8D9B001451C4 /* BSViewController.m in Sources */,
 				C052977118BB8D9B001451C4 /* main.m in Sources */,
-				C01F32B618BE223D0036B89D /* BSAudioLightController.m in Sources */,
+				C0E265D3192252C400409AAF /* BSAudioLightController.m in Sources */,
 				C052977518BB8D9B001451C4 /* BSAppDelegateIOS.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -825,6 +815,7 @@
 				C034273918E300140063B69A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C034273D18E300140063B69A /* Build configuration list for PBXNativeTarget "TimeLightTesterMacTests" */ = {
 			isa = XCConfigurationList;
@@ -833,6 +824,7 @@
 				C034273B18E300140063B69A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C052975C18BB8D9B001451C4 /* Build configuration list for PBXProject "TimeLightTester" */ = {
 			isa = XCConfigurationList;

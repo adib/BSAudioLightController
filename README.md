@@ -4,8 +4,9 @@ Tester app and driver of the [Time-a-Light](http://www.time-a-light.com) traffic
 
 ## Setup
 
-1. Add TimeLightTester as a subproject of your Xcode project.
-2. Add everything inside the `AudioLightController` folder to your target.
+Use one of these two alternatives to use the library:
+ - Add everything inside the `Classes` and `Assets` folders to your target.
+ - Use CocoaPods and add `BSAudioLightController` to your project.
 
 ## Usage
 
