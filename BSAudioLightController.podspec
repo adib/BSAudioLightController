@@ -6,7 +6,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = "BSAudioLightController"
-  s.version          = "0.0.1"
+  s.version          = "1.0.0"
   s.summary          = "Driver of the Time-A-Light traffict light device."
   s.description      = <<-DESC
                        Tester app and driver of the [Time-a-Light](http://www.time-a-light.com) traffic light device, for iOS and OS X.
