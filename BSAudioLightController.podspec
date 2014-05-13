@@ -6,13 +6,13 @@
 #
 Pod::Spec.new do |s|
   s.name             = "BSAudioLightController"
-  s.version          = "1.0.0"
+  s.version          = "1.0.1"
   s.summary          = "Driver of the Time-A-Light traffict light device."
   s.description      = <<-DESC
                        Tester app and driver of the [Time-a-Light](http://www.time-a-light.com) traffic light device, for iOS and OS X.
                        DESC
   s.homepage         = "http://cutecoder.org"
-  s.screenshots      = ""
+  #s.screenshots      = ""
   s.license          = 'BSD'
   s.author           = { "Sasmito Adibowo" => "adib@basil-salad.com" }
   s.source           = { :git => "https://github.com/adib/BSAudioLightController.git", :tag => s.version.to_s }
@@ -31,5 +31,5 @@ Pod::Spec.new do |s|
   s.public_header_files = 'Classes/**/*.h'
   # s.frameworks = 'SomeFramework', 'AnotherFramework'
   # s.dependency 'JSONKit', '~> 1.4'
-  spec.compiler_flags = '-fmodules'
+  s.compiler_flags = '-fmodules'
 end
